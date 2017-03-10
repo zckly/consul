@@ -336,6 +336,7 @@ App.NodesAddController = Ember.ObjectController.extend({
     }
   }
 })
+
 App.NodesShowController = Ember.ObjectController.extend({
   needs: ["dc", "nodes"],
   dc: Ember.computed.alias("controllers.dc"),
@@ -402,6 +403,54 @@ App.NodesController = ItemBaseController.extend({
 App.ServicesController = ItemBaseController.extend({
   items: Ember.computed.alias("services"),
 });
+
+App.ServicesAddController = ItemBaseController.extend({
+  actions: {
+    createService: function() {
+      this.set('isLoading', true);
+
+      var controller = this;
+      var newService = controller.get('newService');
+      // var parentKey = controller.get('parentKey');
+      // var grandParentKey = controller.get('grandParentKey');
+      var dc = controller.get('dc').get('datacenter');
+      var token = App.get('settings.token');
+      // If we don't have a previous model to base
+      // on our parent, or we're not at the root level,
+      // add the prefix
+
+      // Put the Key and the Value retrieved from the form
+
+      var newServiceJson = {
+        "Name": newService.get('serviceName'),
+        "Address": newService.get('address'),
+        "Port": newService.get('port')
+        
+      }
+
+      Ember.$.ajax({
+          url: (formatUrl(consulHost + "/v1/agent/service/register", token)),
+          type: 'PUT',
+          data: JSON.stringify(newServiceJson)
+      }).then(function(response) {
+        // transition to the right place
+        controller.transitionToRoute('services');
+
+        controller.transitionToRoute('services.show', newService.get('serviceName'));
+        // if (newService.get('isFolder') === true) {
+        //   controller.transitionToRoute('kv.show', newService.get('Key'));
+        // } else {
+        //   controller.transitionToRoute('kv.edit', newService.get('Key'));
+        // }
+        controller.set('isLoading', false);
+      }).fail(function(response) {
+
+        // Render the error message on the form if the request failed
+        controller.set('errorMessage', 'Received error while processing: ' + response.statusText);
+      });
+    }
+  }
+})
 
 App.AclsController = Ember.ArrayController.extend({
   needs: ["dc", "application"],

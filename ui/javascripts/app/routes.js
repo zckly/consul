@@ -62,6 +62,9 @@ App.BaseRoute = Ember.Route.extend({
     },
     addNewNode: function() {
       this.transitionTo('nodes.add')
+    },
+    addNewService: function() {
+      this.transitionTo('services.add')
     }
   }
 });
@@ -233,6 +236,27 @@ App.ServicesRoute = App.BaseRoute.extend({
     controller.set('services', model);
   }
 });
+
+App.ServicesAddRoute = App.BaseRoute.extend({
+  model: function(params) {
+    var dc = this.modelFor('dc').dc;
+    var token = App.get('settings.token');
+
+    // Return a promise to retrieve all of the services
+    return Ember.$.getJSON(formatUrl(consulHost + '/v1/internal/ui/services', dc, token)).then(function(data) {
+      var objs = [];
+      data.map(function(obj){
+       objs.push(App.Service.create(obj));
+      });
+      return objs;
+    });
+  },
+  setupController: function(controller, model) {
+    controller.set('content', model)
+    controller.set('services', model);
+    controller.set('newService', App.Service.create())
+  }
+})
 
 
 App.ServicesShowRoute = App.BaseRoute.extend({

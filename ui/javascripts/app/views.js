@@ -26,6 +26,10 @@ App.ServicesView = Ember.View.extend({
     templateName: 'services',
 });
 
+App.ServicesAddView = Ember.View.extend({
+    templateName: 'add-services',
+});
+
 App.ServicesShowView = Ember.View.extend({
     templateName: 'service'
 });

@@ -20,6 +20,8 @@ App.Router.map(function() {
   this.resource("dc", {path: "/:dc"}, function() {
     // Services represent a consul service
     this.resource("services", { path: "/services" }, function(){
+      //Add a new service
+      this.route("add", {path: "/add"})
       // Show an individual service
       this.route("show", { path: "/*name" });
     });
