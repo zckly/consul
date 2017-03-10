@@ -270,6 +270,72 @@ ItemBaseController = Ember.ArrayController.extend({
   }
 });
 
+App.NodesAddController = Ember.ObjectController.extend({
+  needs: ["dc", "nodes"],
+  dc: Ember.computed.alias("controllers.dc"),
+
+  actions: {
+    createNode: function() {
+      this.set('isLoading', true);
+
+      var controller = this;
+      var newNode = controller.get('newNode');
+      // var parentKey = controller.get('parentKey');
+      // var grandParentKey = controller.get('grandParentKey');
+      var dc = controller.get('dc').get('datacenter');
+      var token = App.get('settings.token');
+      // If we don't have a previous model to base
+      // on our parent, or we're not at the root level,
+      // add the prefix
+
+      // Put the Key and the Value retrieved from the form
+
+      var newNodeJson = {
+        "Node": newNode.get('nodeName'),
+        "Address": newNode.get('address'),
+        "TaggedAddresses": {
+          "lan": newNode.get('address'),
+          "wan": newNode.get('address')
+        },
+        "Meta": {} //just an empty obj
+        //set in the next block
+        // "Service": {
+        //   "Service": newNode.get('service'),
+        //   "Port": newNode.get('servicePort')
+        // }
+      }
+
+      if (newNode.get('service').length > 0) {
+        newNodeJson["Service"] = {
+          "Service": newNode.get('service')
+        }
+        if (newNode.get('servicePort').length > 0) {
+          newNodeJson["Service"]["Port"] = parseInt(newNode.get('servicePort'))
+        }
+      }
+      Ember.$.ajax({
+          url: (formatUrl(consulHost + "/v1/catalog/register", dc, token)),
+          type: 'PUT',
+          data: JSON.stringify(newNodeJson)
+      }).then(function(response) {
+        // transition to the right place
+        controller.transitionToRoute('nodes');
+
+        controller.transitionToRoute('nodes.show', newNode.get('nodeName'));
+        // if (newNode.get('isFolder') === true) {
+        //   controller.transitionToRoute('kv.show', newNode.get('Key'));
+        // } else {
+        //   controller.transitionToRoute('kv.edit', newNode.get('Key'));
+        // }
+        controller.set('isLoading', false);
+      }).fail(function(response) {
+
+        // Render the error message on the form if the request failed
+        controller.set('errorMessage', 'Received error while processing: ' + response.statusText);
+      });
+    }
+  }
+})
 App.NodesShowController = Ember.ObjectController.extend({
   needs: ["dc", "nodes"],
   dc: Ember.computed.alias("controllers.dc"),
@@ -296,12 +362,41 @@ App.NodesShowController = Ember.ObjectController.extend({
           controller.set('errorMessage', 'Received error while processing: ' + response.statusText);
         });
       }
+    },
+    deleteNode: function() {
+      console.log('in here')
+      this.set('isLoading', true);
+      var controller = this;
+      var dc = controller.get('dc').get('datacenter');
+      var token = App.get('settings.token');
+      var node = controller.get('model');
+
+      var deregisterJson = {
+        "Node": node.Node
+      }
+
+      if (window.confirm("Are you sure you want to delete this folder?")) {
+        // Delete the folder
+        Ember.$.ajax({
+            url: (formatUrl(consulHost + "/v1/catalog/deregister", dc, token)),
+            type: 'PUT',
+            data: JSON.stringify(deregisterJson)
+        }).then(function(response) {
+          controller.transitionToRoute('nodes');
+        }).fail(function(response) {
+          // Render the error message on the form if the request failed
+          controller.set('errorMessage', 'Received error while processing: ' + response.statusText);
+        });
+      }
     }
   }
 });
 
 App.NodesController = ItemBaseController.extend({
   items: Ember.computed.alias("nodes"),
+  actions: {
+    
+  }
 });
 
 App.ServicesController = ItemBaseController.extend({

@@ -59,6 +59,9 @@ App.BaseRoute = Ember.Route.extend({
       } else {
         this.transitionTo('kv.edit', key);
       }
+    },
+    addNewNode: function() {
+      this.transitionTo('nodes.add')
     }
   }
 });
@@ -281,6 +284,30 @@ function distance(a, b) {
     return Math.round(rtt * 100000.0) / 100.0;
 }
 
+
+App.NodesAddRoute = App.BaseRoute.extend({
+  model: function(params) {
+    var dc = this.modelFor('dc').dc;
+    var token = App.get('settings.token');
+
+    // Return a promise containing the nodes
+    return Ember.$.getJSON(formatUrl(consulHost + '/v1/internal/ui/nodes', dc, token)).then(function(data) {
+      var objs = [];
+      data.map(function(obj){
+       objs.push(App.Node.create(obj));
+      });
+      return objs;
+    });
+
+  },
+  setupController: function(controller, models) {
+    controller.set('content', models);
+    controller.set('nodes', models);
+
+    controller.set('newNode', App.Node.create());
+
+  }
+})
 App.NodesShowRoute = App.BaseRoute.extend({
   model: function(params) {
     var dc = this.modelFor('dc');

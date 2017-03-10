@@ -25,6 +25,8 @@ App.Router.map(function() {
     });
     // Nodes represent a consul node
     this.resource("nodes", { path: "/nodes" }, function() {
+      // Add a new node
+      this.route("add", {path: "/add"})
       // Show an individual node
       this.route("show", { path: "/:name" });
     });

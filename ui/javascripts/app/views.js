@@ -42,6 +42,10 @@ App.NodesView = Ember.View.extend({
     templateName: 'nodes'
 });
 
+App.NodesAddView = Ember.View.extend({
+    templateName: 'add-node'
+});
+
 App.NodesShowView = Ember.View.extend({
     templateName: 'node'
 });
