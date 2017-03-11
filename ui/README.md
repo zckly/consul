@@ -4,7 +4,7 @@
 
 ### Top level explanation 
 
-The Consul UI is primarily responsible for a GUI view of the Datacenters, Services, Nodes, and Key/Value pairs that are currently registered in Consul. The UI receives and works with this data through Consul’s HTTP API.
+The Consul UI is primarily responsible for a GUI view of the Datacenters, Services, Nodes, and Key/Value pairs that are currently registered in Consul. The UI receives and works with this data through [Consul’s HTTP API](https://www.consul.io/docs/agent/http.html).
 
 ### Where to start
 
@@ -12,15 +12,20 @@ I would begin by defining the first view, Services. This view shows all the curr
 
 To add a service, make a PUT request to the endpoint [/v1/agent/service/register](https://www.consul.io/docs/agent/http/agent.html#agent_service_register) with a JSON object as the data. If you're getting a weird formatting error, try JSON.stringifying the object.
 
+To deregister a service, make a PUT request to the endpoint [/v1/agent/service/deregister/:serviceId](https://www.consul.io/docs/agent/http/agent.html#agent_service_deregister), with serviceId being the unique ID of the service you want to deregister.
+
+
 Next up is the Nodes view. This view shows all the current nodes recognized by Consul. To fetch this data, make a GET request to the endpoint [/v1/catalog/nodes](https://www.consul.io/docs/agent/http/catalog.html#catalog_nodes).
 
-To add a node, simply make a PUT request to the endpoint (/v1/catalog/register)[https://www.consul.io/docs/agent/http/catalog.html#catalog_register] with a JSON object as input. Once again, if you get a formatting error, trying stringifying the JSON.
+To add a node, simply make a PUT request to the endpoint [/v1/catalog/register](https://www.consul.io/docs/agent/http/catalog.html#catalog_register) with a JSON object as input. Once again, if you get a formatting error, trying stringifying the JSON.
 
-Next is the Key Value storage view. Consult the Consul HTTP API docs for K/V for information on interactions with this endpoint: [https://www.consul.io/docs/agent/http/kv.html]
+To delete a node, make a PUT request to the endpoint [/v1/catalog/deregister](https://www.consul.io/docs/agent/http/catalog.html#catalog_deregister) with a JSON object that tells Consul which node to delete.
+
+Next is the Key Value storage view. Consult the Consul HTTP API docs for K/V for information on interactions with this [endpoint](https://www.consul.io/docs/agent/http/kv.html)
 
 ### After creating the new view
 
-After you finish creating the new UI, we need to be able to access it with consul. To start the Consul UI, we need to pass in the `-ui-dir` flag into the `consul agent` CLI command. For example:
+After you finish creating the new UI, we need to be able to access it with consul. To start the Consul UI, we need to pass in the `-ui-dir` flag into the `consul agent` CLI command. For example: 
 
 `consul agent -ui-dir /usr/local/go/src/github.com/hashicorp/consul/ui -data-dir /tmp/ -server` 
 
